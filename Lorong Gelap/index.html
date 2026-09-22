@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lorong Gelap - 3D Horror Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 3D Canvas Viewport -->
+    <div id="canvas-container"></div>
+
+    <!-- Atmospheric Overlays -->
+    <div id="vignette-overlay"></div>
+    <div id="scanline-overlay"></div>
+    <div id="danger-overlay"></div>
+
+    <!-- Jumpscare Shock Overlay -->
+    <div id="jumpscare-overlay">
+        <svg id="jumpscare-face" viewBox="0 0 200 200">
+            <!-- Ghastly Demonic Face -->
+            <circle cx="100" cy="100" r="90" fill="#080808" stroke="#3a0505" stroke-width="6"/>
+            <!-- Hollow Glowing Eyes -->
+            <ellipse cx="65" cy="80" rx="22" ry="28" fill="#ff0000" stroke="#fff" stroke-width="2"/>
+            <ellipse cx="135" cy="80" rx="22" ry="28" fill="#ff0000" stroke="#fff" stroke-width="2"/>
+            <circle cx="65" cy="80" r="8" fill="#ffffff"/>
+            <circle cx="135" cy="80" r="8" fill="#ffffff"/>
+            <!-- Sunken Eye Sockets -->
+            <path d="M 40,55 Q 65,45 90,65" stroke="#4a0000" stroke-width="4" fill="none"/>
+            <path d="M 160,55 Q 135,45 110,65" stroke="#4a0000" stroke-width="4" fill="none"/>
+            <!-- Horrific Gaping Mouth with Razor Sharp Teeth -->
+            <ellipse cx="100" cy="145" rx="42" ry="32" fill="#200000" stroke="#ff1111" stroke-width="4"/>
+            <!-- Upper Teeth -->
+            <polygon points="68,130 73,145 78,130" fill="#eaeaea"/>
+            <polygon points="80,128 86,148 92,128" fill="#eaeaea"/>
+            <polygon points="94,127 100,150 106,127" fill="#eaeaea"/>
+            <polygon points="108,128 114,148 120,128" fill="#eaeaea"/>
+            <polygon points="122,130 127,145 132,130" fill="#eaeaea"/>
+            <!-- Lower Teeth -->
+            <polygon points="74,162 80,147 86,162" fill="#eaeaea"/>
+            <polygon points="88,164 94,145 100,164" fill="#eaeaea"/>
+            <polygon points="102,164 108,145 114,164" fill="#eaeaea"/>
+            <polygon points="116,162 122,147 128,162" fill="#eaeaea"/>
+            <!-- Bloody Cracks -->
+            <path d="M 100,20 L 95,45 L 105,65" stroke="#880000" stroke-width="3" fill="none"/>
+            <path d="M 40,110 L 25,130 L 32,150" stroke="#880000" stroke-width="3" fill="none"/>
+            <path d="M 160,110 L 175,130 L 168,150" stroke="#880000" stroke-width="3" fill="none"/>
+        </svg>
+    </div>
+
+    <!-- Lock Hint for Touchpad / Mouse Users -->
+    <div id="lock-hint">👆 Klik layar untuk mengunci Mouse/Touchpad (atau gunakan Tombol Panah ⬅️ ➡️ ⬆️ ⬇️)</div>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+        <div id="crosshair"></div>
+
+        <div id="objective-banner">
+            Find 3 keys and escape the building.
+        </div>
+
+        <div id="interaction-prompt">
+            <span class="key">E</span><span id="prompt-text">Press E to interact</span>
+        </div>
+
+        <div id="notification"></div>
+
+        <!-- Keys Tracker -->
+        <div id="keys-container">
+            <span id="key-1" class="key-icon">🔑</span>
+            <span id="key-2" class="key-icon">🔑</span>
+            <span id="key-3" class="key-icon">🔑</span>
+            <span id="keys-label">Keys: 0/3</span>
+        </div>
+
+        <!-- Battery & Stamina Bars -->
+        <div id="status-container">
+            <div class="bar-row">
+                <div class="bar-label">
+                    <span>FLASHLIGHT [F]</span>
+                    <span id="battery-percent">100%</span>
+                </div>
+                <div class="bar-background">
+                    <div id="battery-bar"></div>
+                </div>
+            </div>
+
+            <div class="bar-row">
+                <div class="bar-label">
+                    <span>STAMINA [SHIFT]</span>
+                </div>
+                <div class="bar-background">
+                    <div id="stamina-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN MENU -->
+    <div id="main-menu" class="modal-screen">
+        <div class="menu-box">
+            <h1 class="game-title">LORONG GELAP</h1>
+            <h2 class="sub-title">A 3D First-Person Horror Game</h2>
+            <div class="menu-buttons">
+                <button id="play-btn" class="horror-btn primary">Play</button>
+                <button id="instructions-btn" class="horror-btn">Instructions</button>
+                <button id="quit-btn" class="horror-btn" onclick="window.close(); alert('Tutup tab browser untuk keluar.');">Quit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSTRUCTIONS MODAL -->
+    <div id="instructions-modal" class="modal-screen" style="display: none;">
+        <div class="menu-box">
+            <h1 class="game-title" style="font-size: 32px;">INSTRUCTIONS</h1>
+            <table class="instructions-table">
+                <tr>
+                    <td class="key-col">WASD</td>
+                    <td>Move</td>
+                </tr>
+                <tr>
+                    <td class="key-col">Mouse</td>
+                    <td>Look</td>
+                </tr>
+                <tr>
+                    <td class="key-col">Shift</td>
+                    <td>Run</td>
+                </tr>
+                <tr>
+                    <td class="key-col">F</td>
+                    <td>Flashlight</td>
+                </tr>
+                <tr>
+                    <td class="key-col">E</td>
+                    <td>Interact</td>
+                </tr>
+            </table>
+            <div class="instructions-notes">
+                <strong>SURVIVAL TIPS:</strong><br>
+                • Jelajahi lorong dan 4 ruangan untuk menemukan 3 kunci yang tersebar.<br>
+                • Perhatikan baterai senter! Ambil baterai hijau cadangan jika baterai menipis.<br>
+                • Monster humanoid gelap ("The Lurker") berpatroli di gedung.<br>
+                • Suara lari cepat (Shift) dan sorotan senter dapat menarik perhatian monster.<br>
+                • Jika layar bergetar merah dan detak jantung berdegup kencang, MONSTER SEDANG MENDEKAT!<br>
+                • Kumpulkan ke-3 kunci, lalu buka pintu keluar (EXIT) di ujung lorong utara untuk selamat.
+            </div>
+            <div class="menu-buttons" style="margin-top: 20px;">
+                <button id="back-btn" class="horror-btn">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div id="game-over-screen" class="modal-screen" style="display: none;">
+        <div class="menu-box">
+            <h1>GAME OVER</h1>
+            <p>"Something found you..."</p>
+            <div class="menu-buttons">
+                <button id="retry-btn" class="horror-btn primary">Try Again</button>
+                <button id="gameover-menu-btn" class="horror-btn">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VICTORY SCREEN -->
+    <div id="victory-screen" class="modal-screen" style="display: none;">
+        <div class="menu-box">
+            <h1>YOU ESCAPED</h1>
+            <p>"You survived the night."</p>
+            <div id="escape-time" class="escape-stats">Time Survived: 0m 0s</div>
+            <div class="menu-buttons">
+                <button id="play-again-btn" class="horror-btn primary">Play Again</button>
+                <button id="victory-menu-btn" class="horror-btn">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Game Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/textures.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/monster.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
